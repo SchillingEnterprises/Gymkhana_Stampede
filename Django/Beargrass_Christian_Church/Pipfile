@@ -1,0 +1,13 @@
+[[source]]
+url = ""
+verify_ssl = true
+
+[packages]
+django = "*"
+djangorestframework = "*"
+markdown2 = "*"
+channels = "*"
+whitenoise = "*"
+
+[requires]
+python_version = "*"

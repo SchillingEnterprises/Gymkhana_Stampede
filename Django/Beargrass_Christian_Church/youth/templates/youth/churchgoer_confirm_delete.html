@@ -1,0 +1,10 @@
+{% extends "Beargrass_Christian_Church/layout.html" %}
+
+{% block body_content %}
+<h1>Delete {{ churchgoer.first_name }} {{ churchgoer.maiden_name }}?</h1>
+
+<form method='POST'>
+    {% csrf_token %}
+    <input type="submit" class="btn btn-danger" value="Delete"><a href="{% url 'churchgoer:detail' pk=churchgoer_pk %}">Cancel</a>
+</form>
+{% endblock %}

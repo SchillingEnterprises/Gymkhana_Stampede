@@ -1,0 +1,32 @@
+{% extends "Beargrass_ChristianChurch/layout.html" %}
+{% load static %}
+{% block content %}
+<p><a class="btn btn-default" href="{% url 'youth_churchgoer_list' %}">ChurchGoer Listing</a></p>
+<table class="table">
+    <tr><td>First Name: </td><td>{{ object.first_name }}</td></tr>
+    <tr><td>Middle Name: </td><td>{{ object.middle_name }}</td></tr>
+    <tr><td>Maiden Name: </td><td>{{ object.maiden_name }}</td></tr>
+    <tr><td>Nickname: </td><td>{{ object.nickname }}</td></tr>
+    <tr><td>Birthday: </td><td>{{ object.birthday }}</td></tr>
+    <tr><td>Guardian's Name: </td><td>{{ object.name_of_guardian }}</td></tr>
+    <tr><td>Home Church: </td><td>{{ object.home_church }}</td></tr>
+    <tr><td>Beargrass Member: </td><td>{{ object.family_are_beargrass_members }}</td></tr>
+    <tr><td>Address: </td><td>{{ object.address }}</td></tr>
+    <tr><td>Email: </td><td>{{ object.email }}</td></tr>
+    <tr><td>School: </td><td>{{ object.school }}</td></tr>
+    <tr><td>Degrees: </td><td>{{ object.degree }}</td></tr>
+    <tr><td>Employer: </td><td>{{ object.employer }}</td></tr>
+    <tr><td>Gender: </td><td>{{ object.gender }}</td></tr>
+    <tr><td>Facebook: </td><td>{{ object.facebook_URL }}</td></tr>
+    <tr><td>Google+: </td><td>{{ object.google_plus_URL }}</td></tr>
+    <tr><td>Instagram: </td><td>{{ object.instagram_URL }}</td></tr>
+    <tr><td>Snapchat: </td><td>{{ object.snapchat_URL }}</td></tr>
+    <tr><td>Twitter: </td><td>{{ object.twitter_URL }}</td></tr>
+    <tr><td>married: </td><td>{{ object.married }}</td></tr>
+    <tr><td>Spouse's Name: </td><td>{{ object.name_of_spouse }}</td></tr>
+    <tr><td>Child's Name: </td><td>{{ object.name_of_child }}</td></tr>
+    <tr><td>Surname: </td><td>{{ object.surname }}</td></tr>
+</table>
+<a class="btn btn-primary" href="{{object.get_update_url}}">Edit ChurchGoer</a>
+
+{% endblock %}
