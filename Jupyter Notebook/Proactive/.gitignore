@@ -637,7 +637,9 @@ crashlytics-build.properties
 fabric.properties
 
 # User directories
-store/__MACOSX
-store/MSA
+store/
+store/__MACOSX/
+store/MSA/
+temp/
 temp/mass_shootings.db
 temp/mass_shootings.sqlite
