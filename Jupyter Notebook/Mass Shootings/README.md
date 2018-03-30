@@ -3,7 +3,7 @@
 ###### By: Gavin Schilling
 
 
-### PIP Imports:
+### PIP Imports to Re-run Kernal:
 * Bokeh
 * Beautiful Soup 4
 * NumPy
