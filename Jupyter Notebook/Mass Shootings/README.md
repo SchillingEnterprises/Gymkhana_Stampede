@@ -5,17 +5,15 @@
 
 ### PIP Imports:
 * Bokeh
-* BS4
-* CSV
-* IO
-* JSON
+* Beautiful Soup 4
 * NumPy
 * OpenPyXL
 * Pandas
 * Requests
-* Sqlite3
 * Urllite.request
 * ZipFile
 
 ### Run-time Environment:
 Jupyter Notebooks (file `MassShootings.ipynb`)
+
+***Note: Depending upon machine type you might need to create two separate directories on the root level of the project directory: store & temp.***
