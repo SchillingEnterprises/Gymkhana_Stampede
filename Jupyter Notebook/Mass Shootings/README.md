@@ -4,13 +4,21 @@
 
 
 ### PIP Imports to Re-run Kernal:
+* Basemap
 * Bokeh
 * Beautiful Soup 4
+* Lxml
+* Matplotlib
 * NumPy
 * OpenPyXL
 * Pandas
+* PDFrw
+* Pillow
+* PyYAML
 * Requests
+* Urllib3
 * Urllite.request
+* xlrd
 * ZipFile
 
 ### Run-time Environment:
