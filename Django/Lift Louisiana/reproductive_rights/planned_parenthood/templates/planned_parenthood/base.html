@@ -1,0 +1,22 @@
+{% load copyrighttags %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% block css %}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Gaegu|Indie+Flower|Monoton">
+    <link rel="stylesheet" href="{% static 'planned_parenthood/style.css' %}">
+    {% endblock css %}
+</head>
+<body>
+    <h1>Planned Parenthood</h1>
+    {% block content %}{% endblock content%}
+    {% block footer %}
+    <section class="divider1">
+        <p>(c) {% getCopyrightYears %} by Gavin Schilling Marketing</p>
+    </section>
+    {% endblock footer%}
+</body>
+</html>

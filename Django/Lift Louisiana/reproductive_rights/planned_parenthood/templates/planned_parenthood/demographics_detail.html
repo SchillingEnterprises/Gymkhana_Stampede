@@ -1,0 +1,15 @@
+{% extends "planned_parenthood/base.html" %}
+{% load static %}
+{% block content %}
+<p><a class="btn btn-default" href="{% url 'demographics_list' %}">Demographics Listing</a></p>
+<table class="table">
+    <tr><td>title</td><td>{{ object.title }}</td></tr>
+    <tr><td>first_name</td><td>{{ object.first_name }}</td></tr>
+    <tr><td>middle_name</td><td>{{ object.middle_name }}</td></tr>
+    <tr><td>last_name</td><td>{{ object.last_name }}</td></tr>
+    <tr><td>suffix</td><td>{{ object.suffix }}</td></tr>
+    <tr><td>email_address</td><td>{{ object.email_address }}</td></tr>
+</table>
+<a class="btn btn-primary" href="{{object.get_update_url}}">Edit Demographics</a>
+
+{% endblock %}
