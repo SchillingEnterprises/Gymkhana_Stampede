@@ -10,11 +10,18 @@ class User(models.Model):
     location = GeopositionField()
     proof = models.ImageField()
 
+    def __str__(self):
+        return self.email_address
+
 
 class Checkpoint(models.Model):
+    name = models.CharField(max_length=500)
     location = GeopositionField()
     photograph = models.ImageField()
     information = models.TextField()
+
+    def __str__(self):
+        return self.name
 
 
 class Event(models.Model):
@@ -23,6 +30,12 @@ class Event(models.Model):
     location = GeopositionField()
     point_value = models.IntegerField()
 
+    def __str__(self):
+        return self.name
+
 
 class Reward(models.Model):
     point_total = models.IntegerField()
+
+    def __str__(self):
+        return self.point_total
