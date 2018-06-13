@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
-import credentials
+# from KDF import credentials
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -30,6 +30,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'Derby_Event.apps.DerbyEventConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -115,4 +116,5 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-GEOPOSITION_GOOGLE_MAPS_API_KEY = credentials.google_maps_api_key
+GEOPOSITION_GOOGLE_MAPS_API_KEY = 'AIzaSyDy7JrdPC4Y1KmLxhWY5AAisbKtdoYJp9Y'
+# GEOPOSITION_GOOGLE_MAPS_API_KEY = credentials.login['google_maps_api_key']
