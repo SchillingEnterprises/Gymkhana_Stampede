@@ -1,3 +1,6 @@
+# Created by: Gavin Schilling
+# Purpose: Webscrape Gallopalooza horse images
+
 from random import randint
 from time import sleep, time
 from warnings import warn
