@@ -1,6 +1,10 @@
-from google.cloud import vision
+import io
 from os import environ, path
 from PIL import Image, ImageDraw
+
+# Imports the Google Cloud client library
+from google.cloud import vision
+from google.cloud.vision import types
 
 environ['GOOGLE_APPLICATION_CREDENTIALS'] = path.join("../", 'google.json')
 client = vision.ImageAnnotatorClient()
