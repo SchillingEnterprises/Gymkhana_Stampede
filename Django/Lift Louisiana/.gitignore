@@ -181,3 +181,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+.idea/markdown-navigator.xml
+.idea/markdown-navigator/
