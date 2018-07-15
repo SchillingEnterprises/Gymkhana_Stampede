@@ -19,6 +19,7 @@ class Checkpoint(models.Model):
     location = GeopositionField()
     photograph = models.ImageField()
     information = models.TextField()
+    isValid = models.BooleanField()
 
     def __str__(self):
         return self.name
