@@ -1,0 +1,12 @@
+body > section {
+    background-color: blue;
+    color: pink;
+}
+
+body > section > div {
+    font-family: 'Fredericka the Great', cursive;
+}
+
+body > article > div > aside > div {
+    font-family: 'Cormorant', serif;
+}

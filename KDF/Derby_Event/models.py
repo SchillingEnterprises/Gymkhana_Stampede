@@ -1,14 +1,30 @@
 from django.db import models
+from django.contrib.auth.models import User
+
 from geoposition.fields import GeopositionField
+from localflavor.us.models import USStateField, USZipCodeField
+from cities.models import City
 
 
-class User(models.Model):
-    first_name = models.CharField(max_length=200)
-    last_name = models.CharField(max_length=200)
-    email_address = models.EmailField()
+class BiographicInformation(models.Model):
     birthday = models.DateField()
+    city = City
+    date_joined = User.date_joined
+    email_address = User.email
+    first_name = User.first_name
+    groups = User.groups
+    is_active = User.is_active
+    is_staff = User.is_staff
+    is_superuser = User.is_superuser
+    last_login = User.last_login
+    last_name = User.last_name
     location = GeopositionField()
+    password = User.password
+    permissions = User.user_permissions
     proof = models.ImageField()
+    state = USStateField
+    username = User.username
+    zip_code = USZipCodeField
 
     def __str__(self):
         return self.email_address
