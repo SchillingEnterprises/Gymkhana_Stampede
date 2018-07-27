@@ -1,8 +1,12 @@
-from django.urls import path
+from django.conf.urls import url
 
-from . import views
+from .views import index, landing_page, login, louisville_concierge, register, rules
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('welcome', views.index, name='welcome'),
+    url(r'^rules/', rules, name="rules"),
+    url(r'^register/', register, name="register"),
+    url(r'^louisville_concierge/', louisville_concierge, name="louisville_concierge"),
+    url(r'^login/', login, name="login"),
+    url(r'^landing_page/', landing_page, name="landing_page"),
+    url(r'^', index, name="index"),
 ]
