@@ -1,1 +1,0 @@
-alert("You can add, subtract, multiply, or divide directly in the URL!)");

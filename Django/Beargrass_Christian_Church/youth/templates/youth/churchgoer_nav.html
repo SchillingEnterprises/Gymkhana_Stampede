@@ -1,5 +1,0 @@
-{% for churchgoer in youth %}
-    <div>
-        <a href="{% url 'churchgoer:detail' pk=churchgoer.pk %}">{{ object.nickname }} {{ object.maiden_name }}</a>
-    </div>
-{% endfor %}
