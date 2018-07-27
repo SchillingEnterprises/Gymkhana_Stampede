@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-﻿# Gymkhana Stampede_Created By: Gavin Schilling Marketing_`python manage.py runserver`
-=======
 # Python Repo Directory
 By Gavin Schilling
 
@@ -39,4 +36,3 @@ By Gavin Schilling
 
 ### Jupyter Notebook
 + [Mass Shootings](https://github.com/schillgc/Python/tree/master/Jupyter%20Notebook/Mass%20Shootings)
->>>>>>> 9a11520ca2e85568a9b3f6da49b0eec11acf6e00
