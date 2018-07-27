@@ -1,0 +1,12 @@
+body {
+    background: white url("images/EckeSealGold_220.png") no-repeat;
+}
+
+body > h1 {
+    font-family: 'Indie Flower', 'Gaegu', 'Monoton', cursive;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}

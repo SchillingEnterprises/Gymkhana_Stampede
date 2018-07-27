@@ -1,0 +1,17 @@
+{% extends "planned_parenthood/base.html" %}
+{% load static %}
+{% block content %}
+<p><a class="btn btn-default" href="{% url 'legislation_list' %}">Legislation Listing</a></p>
+<table class="table">
+    <tr><td>name</td><td>{{ object.name }}</td></tr>
+    <tr><td>authors</td><td>{{ object.authors }}</td></tr>
+    <tr><td>chamber</td><td>{{ object.chamber }}</td></tr>
+    <tr><td>strategic_plan</td><td>{{ object.strategic_plan }}</td></tr>
+    <tr><td>effective</td><td>{{ object.effective }}</td></tr>
+    <tr><td>favorable</td><td>{{ object.favorable }}</td></tr>
+    <tr><td>is_law</td><td>{{ object.is_law }}</td></tr>
+    <tr><td>was_defeated</td><td>{{ object.was_defeated }}</td></tr>
+</table>
+<a class="btn btn-primary" href="{{object.get_update_url}}">Edit Legislation</a>
+
+{% endblock %}

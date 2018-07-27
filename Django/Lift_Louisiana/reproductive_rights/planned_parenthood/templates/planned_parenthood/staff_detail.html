@@ -1,0 +1,12 @@
+{% extends "planned_parenthood/base.html" %}
+{% load static %}
+{% block content %}
+<p><a class="btn btn-default" href="{% url 'staff_list' %}">Staff Listing</a></p>
+<table class="table">
+    <tr><td>credentials</td><td>{{ object.credentials }}</td></tr>
+    <tr><td>specialty</td><td>{{ object.specialty }}</td></tr>
+    <tr><td>active</td><td>{{ object.active }}</td></tr>
+</table>
+<a class="btn btn-primary" href="{{object.get_update_url}}">Edit Staff</a>
+
+{% endblock %}

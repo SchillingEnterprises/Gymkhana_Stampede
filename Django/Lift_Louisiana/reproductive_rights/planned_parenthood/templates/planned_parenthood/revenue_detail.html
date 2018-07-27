@@ -1,0 +1,16 @@
+{% extends "planned_parenthood/base.html" %}
+{% load static %}
+{% block content %}
+<p><a class="btn btn-default" href="{% url 'revenue_list' %}">Revenue Listing</a></p>
+<table class="table">
+    <tr><td>created</td><td>{{ object.created }}</td></tr>
+    <tr><td>last_updated</td><td>{{ object.last_updated }}</td></tr>
+    <tr><td>transaction</td><td>{{ object.transaction }}</td></tr>
+    <tr><td>donation</td><td>{{ object.donation }}</td></tr>
+    <tr><td>income</td><td>{{ object.income }}</td></tr>
+    <tr><td>investment</td><td>{{ object.investment }}</td></tr>
+    <tr><td>expense</td><td>{{ object.expense }}</td></tr>
+</table>
+<a class="btn btn-primary" href="{{object.get_update_url}}">Edit Revenue</a>
+
+{% endblock %}
