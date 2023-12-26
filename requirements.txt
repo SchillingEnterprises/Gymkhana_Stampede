@@ -3,7 +3,7 @@ astor==0.7.1
 attrs==18.1.0
 backcall==0.1.0
 beautifulsoup4==4.6.0
-bleach==3.1.1
+bleach==3.1.2
 botocore==1.10.65
 cachetools==2.1.0
 certifi==2018.4.16
@@ -16,7 +16,7 @@ dask==0.18.2
 decorator==4.3.0
 defusedxml==0.5.0
 dill==0.2.8.2
-Django==2.2.9
+Django==2.2.10
 django-allauth==0.36.0
 django-allauth-bootstrap==0.2
 django-bootstrap==0.2.4
@@ -67,7 +67,7 @@ googleapis-common-protos==1.6.0b4
 grpc-google-iam-v1==0.11.4
 grpcio==1.14.0rc1
 html5lib==1.0.1
-httplib2==0.11.3
+httplib2==0.18.0
 idna==2.7
 ImageScraper==2.0.7
 ipykernel==4.8.2
@@ -90,7 +90,7 @@ mistune==0.8.3
 nbconvert==5.3.1
 nbformat==4.4.0
 networkx==2.1
-notebook==5.7.2
+notebook==5.7.8
 numpy==1.15.0
 oauth2client==4.1.2
 oauthlib==2.1.0
@@ -105,7 +105,7 @@ proto-google-cloud-datastore-v1==0.90.4
 proto-google-cloud-error-reporting-v1beta1==0.15.3
 proto-google-cloud-logging-v2==0.91.3
 protobuf==3.6.0
-psutil==5.4.6
+psutil==5.6.5
 pur==5.0.0
 pyasn1==0.4.4
 pyasn1-modules==0.2.2
@@ -131,7 +131,7 @@ SimplePool==0.1
 six==1.11.0
 swapper==1.1.0
 tensorboard==1.10.0
-tensorflow==1.12.1
+tensorflow==1.15
 termcolor==1.1.0
 terminado==0.8.1
 testpath==0.3.1
