@@ -1,7 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 
 
-# Create your views here.
 def index(request):
     return render(request, "index.html")
 
@@ -11,7 +10,8 @@ def landing_page(request):
 
 
 def login(request):
-    return render(request, "login.html")
+    """Use django-allauth's real login flow instead of a non-functional mock form."""
+    return redirect("account_login")
 
 
 def louisville_concierge(request):
@@ -19,7 +19,8 @@ def louisville_concierge(request):
 
 
 def register(request):
-    return render(request, "register.html")
+    """Use django-allauth's real signup flow instead of a static, non-submitting form."""
+    return redirect("account_signup")
 
 
 def rules(request):

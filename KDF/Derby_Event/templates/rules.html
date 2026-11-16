@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}How to Play | Gymkhana Stampede{% endblock %}
+{% block content %}
+<section class="container py-5">
+    <div class="mb-4">
+        <p class="eyebrow mb-2">The original hunt concept</p>
+        <h1 class="display-5 fw-bold">How to play</h1>
+        <p class="lead text-secondary">A simple city-wide discovery challenge inspired by Louisville's Gallopalooza horse sculptures.</p>
+    </div>
+    <div class="row g-4">
+        <div class="col-md-4"><article class="rule-card h-100"><span class="feature-number">01</span><h2 class="h4">Find the horses</h2><p class="mb-0">Discover Gallopalooza horse sculptures around Louisville and Southern Indiana from public, safe viewing areas.</p></article></div>
+        <div class="col-md-4"><article class="rule-card h-100"><span class="feature-number">02</span><h2 class="h4">Enjoy the city</h2><p class="mb-0">Respect public spaces, local businesses, traffic rules, and any posted access restrictions.</p></article></div>
+        <div class="col-md-4"><article class="rule-card h-100"><span class="feature-number">03</span><h2 class="h4">Follow official updates</h2><p class="mb-0">The original concept included photo submissions and prizes. Those features are not currently active in this application.</p></article></div>
+    </div>
+    <div class="alert alert-info mt-4" role="status">
+        <strong>Participation status:</strong> Photo uploads, points, prizes, and the leaderboard are not enabled. This site does not currently accept submissions or award rewards.
+    </div>
+    <a class="btn btn-outline-dark mt-2" href="{% url 'landing_page' %}">Back to explore</a>
+</section>
+{% endblock %}
