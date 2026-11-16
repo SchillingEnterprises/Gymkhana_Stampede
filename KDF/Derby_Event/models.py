@@ -1,58 +1,69 @@
+"""Core domain models for the Gymkhana Stampede event experience."""
+from django.conf import settings
 from django.db import models
-from django.contrib.auth.models import User
-
-from geoposition.fields import GeopositionField
-from localflavor.us.models import USStateField, USZipCodeField
-from cities.models import City
 
 
-class BiographicInformation(models.Model):
+class Participant(models.Model):
+    """A participant profile linked to Django's built-in authentication account."""
+
+    account = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="participant_profile",
+        null=True,
+        blank=True,
+    )
+    first_name = models.CharField(max_length=200)
+    last_name = models.CharField(max_length=200)
+    email_address = models.EmailField()
     birthday = models.DateField()
-    city = City
-    date_joined = User.date_joined
-    email_address = User.email
-    first_name = User.first_name
-    groups = User.groups
-    is_active = User.is_active
-    is_staff = User.is_staff
-    is_superuser = User.is_superuser
-    last_login = User.last_login
-    last_name = User.last_name
-    location = GeopositionField()
-    password = User.password
-    permissions = User.user_permissions
-    proof = models.ImageField()
-    state = USStateField
-    username = User.username
-    zip_code = USZipCodeField
+    # The original project stored coordinates as a serialized string. Keep that
+    # representation so existing rows survive the migration; new map fields can
+    # be introduced separately after the historic values have been audited.
+    location = models.CharField(max_length=42, blank=True, default="")
+    proof = models.ImageField(upload_to="participants/proofs/", blank=True)
+
+    class Meta:
+        ordering = ("last_name", "first_name")
+        verbose_name = "participant"
+        verbose_name_plural = "participants"
 
     def __str__(self):
-        return self.email_address
+        return f"{self.first_name} {self.last_name}".strip()
 
 
 class Checkpoint(models.Model):
     name = models.CharField(max_length=500)
-    location = GeopositionField()
-    photograph = models.ImageField()
-    information = models.TextField()
-    isValid = models.BooleanField()
+    location = models.CharField(max_length=42, blank=True, default="")
+    photograph = models.ImageField(upload_to="checkpoints/", blank=True)
+    information = models.TextField(blank=True)
+    is_valid = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ("name",)
 
     def __str__(self):
         return self.name
 
 
 class Event(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=120)
     time = models.DateTimeField()
-    location = GeopositionField()
-    point_value = models.IntegerField()
+    location = models.CharField(max_length=42, blank=True, default="")
+    point_value = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ("time", "name")
 
     def __str__(self):
         return self.name
 
 
 class Reward(models.Model):
-    point_total = models.IntegerField()
+    point_total = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ("-point_total",)
 
     def __str__(self):
-        return self.point_total
+        return f"{self.point_total} points"
