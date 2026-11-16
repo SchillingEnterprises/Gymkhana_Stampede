@@ -1,9 +1,28 @@
-runtime: python
-env: flex
-entrypoint: gunicorn -b :$PORT mysite.wsgi
+runtime: python312
+entrypoint: gunicorn -b :$PORT KDF.wsgi:application
 
-beta_settings:
-    cloud_sql_instances: <your-cloudsql-connection-string>
+# Collect static assets before deploying:
+#   python KDF/manage.py collectstatic --noinput
+handlers:
+  - url: /static
+    static_dir: KDF/staticfiles
+    secure: always
+  - url: /.*
+    script: auto
+    secure: always
 
-runtime_config:
-  python_version: 3
+env_variables:
+  DJANGO_DEBUG: "false"
+  DJANGO_DB_ENGINE: "postgresql"
+  DJANGO_TRUST_PROXY: "true"
+  DJANGO_SECURE_SSL_REDIRECT: "true"
+  DJANGO_SESSION_COOKIE_SECURE: "true"
+  DJANGO_CSRF_COOKIE_SECURE: "true"
+
+# For Cloud SQL, configure the instance connection name here after provisioning:
+# beta_settings:
+#   cloud_sql_instances: PROJECT:REGION:INSTANCE
+
+# Set DJANGO_SECRET_KEY, DJANGO_ALLOWED_HOSTS, DJANGO_DB_NAME,
+# DJANGO_DB_USER, DJANGO_DB_PASSWORD, and DJANGO_DB_HOST through
+# Google Cloud Secret Manager / the deployment environment. Do not commit them.
