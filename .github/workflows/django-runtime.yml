@@ -23,7 +23,7 @@ jobs:
       DJANGO_DEBUG: "true"
       DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,testserver
       DJANGO_DB_ENGINE: sqlite
-      DJANGO_DATABASE_NAME: ${{ runner.temp }}/gymkhana-ci.sqlite3
+      DJANGO_DATABASE_NAME: "/tmp/gymkhana-ci.sqlite3"
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
