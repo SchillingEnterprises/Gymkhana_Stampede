@@ -1,0 +1,22 @@
+name: Dependency review
+
+on:
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-review:
+    name: Review dependency changes
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Dependency review
+        uses: actions/dependency-review-action@595b5aeba73380359d98a5e087c3d1c9b3e2b93f # v4.7.1
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: always
