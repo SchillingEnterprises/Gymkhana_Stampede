@@ -1,51 +1,51 @@
-# Dependency upgrade review and release gates
+# Dependency modernization and release gates
 
-## Current baseline
+## Active web runtime
 
-The event application is a Django 2.2.10-era project. The checked-in `requirements.txt` is a historical, very broad pin set spanning the web application, social authentication, geospatial integrations, Google Cloud SDKs, Jupyter/notebook tooling, numerical packages, and TensorFlow. The repository does not currently prove that every pinned package is imported by the deployed event application.
+PR #86 replaced the old monolithic requirements file with a deliberately small supported web runtime:
 
-The current `.github/workflows/source-quality.yml` compiles Python and runs source-level security/configuration tests. It does **not** install the full requirements file, run `pip check`, start Django, run the migration graph against a disposable database, or test the App Engine deployment package. A green run therefore does not establish compatibility for large dependency jumps.
+| Component | Active version | Purpose |
+|---|---:|---|
+| Python | 3.12 | Supported application runtime |
+| Django | 6.1.3 | Web framework |
+| django-allauth | 65.22.1 | Local account login and account routes |
+| Pillow | 13.0.0 | Django ImageField support |
+| Gunicorn | 23.0.0 | WSGI server |
+| Psycopg | 3.3.9 | PostgreSQL driver |
 
-## Open package-only upgrades: hold pending compatibility work
+The old requirements set mixed web runtime dependencies with unused notebook, scientific/ML, geospatial, and historical cloud SDK packages. Those packages were not imported by the active event views/models. They are not installed in the active runtime; the previous pin list remains available in Git history.
 
-The following open Dependabot changes must not be merged solely because dependency review or source compilation is green:
+The App Engine configuration now uses Python 3.12 and the real `KDF.wsgi:application` entry point. The application supports local SQLite and environment-configured PostgreSQL. CI always uses a disposable SQLite database.
 
-| PR | Package change | Release gate |
-|---|---|---|
-| #78 | Tornado 5.1 → 6.6.1 | Confirm Jupyter/notebook and any application integration compatibility |
-| #74 | TensorFlow 1.15 → 2.21.0 | Prove TensorFlow is an active runtime dependency; if retained, port and test model/API code and compatible protobuf/numpy stack |
-| #73 | protobuf 3.6.0 → 7.36.2 | Resolve constraints across legacy Google Cloud clients, TensorFlow, and gRPC |
-| #72 | Django 2.2.10 → 6.1.3 | Full framework migration: allauth, middleware, URL routing, model fields, templates, forms, migrations, authentication, and supported Python runtime |
-| #70 | IPython 6.4.0 → 9.18.1 | Establish whether interactive tooling is a maintained deliverable; verify Jupyter stack if retained |
-| #67 | NumPy 1.15.0 → 2.5.4 | Test all scientific/image/ML consumers and binary wheels; major ABI/API compatibility review |
-| #66 | nbconvert 5.3.1 → 7.17.2 | Upgrade and test the complete notebook/nbformat/Jupyter toolchain if used |
-| #65 | Dask 0.18.2 → 2026.8.0 | Establish active use and test distributed/data APIs if retained |
-| #64 | Notebook 5.7.8 → 7.6.5 | Major notebook architecture/configuration changes; test actual notebooks and extensions if present |
-| #63 | Mistune 0.8.3 → 3.4.0 | Check nbconvert/Markdown rendering integration and any direct imports |
-| #62 | Werkzeug 0.15.3 → 3.1.9 | Check Flask and any Werkzeug APIs/extensions before updating |
-| #61 | urllib3 1.24.2 → 2.8.0 | Resolve compatibility with old requests, botocore, Google clients, and all transitive consumers |
+## Runtime verification
 
-These are package proposals, not verified application upgrades. Keep them open until the corresponding release gate is satisfied; do not consolidate their version pins into `master` as a batch.
+The existing source-quality workflow now performs real runtime checks:
 
-## Recommended modernization sequence
+1. Install `requirements.txt` and run `pip check`.
+2. Compile project Python and run source-level security/architecture tests.
+3. Run Django system checks.
+4. Run `makemigrations --check --dry-run`.
+5. Apply migrations to a disposable SQLite database.
+6. Run Django integration tests for the public pages and allauth account redirects.
+7. Collect static assets.
 
-1. **Inventory actual runtime imports.** Trace imports from `KDF/KDF`, `Derby_Event`, the WSGI entry point, templates, scheduled tasks, and deployment metadata. Distinguish live application dependencies from archived notebook, machine-learning, and historical SDK dependencies.
-2. **Separate dependency groups.** Build a small web-runtime requirements set and separate optional archive/research/notebook extras only where real maintained use is demonstrated. Do not delete archival code or notebooks as a side effect.
-3. **Choose a supported Django target.** Upgrade Django with a compatible allauth release and required middleware/settings changes. Stage this independently from unrelated scientific package updates.
-4. **Reconcile deployment configuration.** Confirm the App Engine entry point uses the actual `KDF.wsgi` module, then validate the full package on the intended host/runtime.
-5. **Add runtime CI.** Install the selected requirements, run `pip check`, Django system checks, URL/view tests, authentication tests, and migrations against a disposable database. Keep the committed database untouched.
-6. **Rehearse data migrations.** Use a protected copy with representative historical participant, checkpoint, event, reward, and media references. Verify row counts and foreign-key relationships before and after each migration.
-7. **Upgrade one compatible family at a time.** Merge a package update only when the app-level tests and deployment smoke test pass, not merely the dependency scanner.
+The old package-only Dependabot proposals #61–#67, #70, #72–#74, and #78 were closed as superseded by the runtime separation. They are not active web dependencies, so merging their individual upgrades would reintroduce unnecessary packages.
 
-## Data and security safeguards
+## What is still not production-ready
 
-- Never run migrations against the tracked database as part of CI.
+- Public signup remains disabled until account creation is integrated with the `Participant` profile and a real verified-email delivery flow.
+- Existing participant rows are not automatically converted into Django authentication accounts.
+- Photo submissions, point awarding, and the leaderboard are not implemented as working application flows.
+- The app still needs a provisioned persistent PostgreSQL/Cloud SQL instance, Secret Manager configuration, real email delivery, host/CSRF settings, backup/restore verification, and a production deployment rehearsal.
+- Do not deploy using the tracked SQLite database or run migrations against it.
+
+## Migration and data safeguards
+
+- The original coordinate field stored text in a varchar(42). The migration-local compatibility field preserves that representation without installing the obsolete geoposition app. No geocoding or coordinate transformation occurs.
+- The Participant profile rename is in-place and retains existing rows. Its account link is nullable.
+- New checkpoints default to unapproved (`is_valid=False`).
+- Reward totals remain integers until historic data has been audited.
+- Never run migrations against the tracked database as part of CI. Rehearse on a protected representative copy and compare row counts, foreign keys, file paths, and reward totals.
 - Keep original event photos and research assets intact.
-- Do not infer that the participant profile is an authentication account; the new nullable relation is intentionally additive.
-- New checkpoints remain unapproved by default.
 - Rotate any API keys previously committed to public Git history. Moving a key to environment configuration does not revoke its old value.
 - Keep secrets out of repository files and restrict browser mapping keys by referrer and API.
-
-## Current disposition
-
-The open upgrades listed above remain **held for application compatibility review**. The participant model and reward calculation repairs already merged to `master` are schema/domain foundations, not a substitute for a supported Django runtime or a representative-data migration rehearsal.
