@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Explore the Hunt | Gymkhana Stampede{% endblock %}
+{% block content %}
+<section class="container py-5">
+    <div class="mb-4">
+        <p class="eyebrow mb-2">Your next stop</p>
+        <h1 class="display-5 fw-bold">Explore Louisville</h1>
+        <p class="lead text-secondary mb-0">Use the map to orient yourself, then explore the rules and local guide before heading out.</p>
+    </div>
+    <div class="row g-4 align-items-stretch">
+        <div class="col-lg-8">
+            <div class="map-panel h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h5 mb-0">Louisville area map</h2>
+                    <span class="badge text-bg-light">Map provider: Waze</span>
+                </div>
+                <iframe title="Waze map of the Louisville area" src="https://embed.waze.com/en/iframe?zoom=12&pin=1&desc=1"
+                        width="100%" height="460" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"
+                        allowfullscreen></iframe>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="d-grid gap-3 h-100">
+                <a class="destination-card" href="{% url 'rules' %}">
+                    <span class="eyebrow">Start here</span>
+                    <h2 class="h4">How to play</h2>
+                    <span>Review the original hunt rules and current participation status →</span>
+                </a>
+                <a class="destination-card" href="{% url 'louisville_concierge' %}">
+                    <span class="eyebrow">Explore more</span>
+                    <h2 class="h4">Louisville guide</h2>
+                    <span>Browse the preserved local guide categories →</span>
+                </a>
+                <div class="destination-card destination-card-muted">
+                    <span class="eyebrow">In development</span>
+                    <h2 class="h4">Photo submissions and leaderboard</h2>
+                    <span>These interactive features are not enabled yet. No submissions are being collected.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
