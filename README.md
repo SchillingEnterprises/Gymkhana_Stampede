@@ -35,3 +35,12 @@ See [the dependency upgrade review and release gates](docs/dependency-upgrade-re
 The original event profile model is renamed in place to `Participant` by a forward migration, preserving the existing participant table and rows. A nullable one-to-one link to Django's authentication account is added, but existing participants are not automatically turned into login accounts. Legacy coordinate strings and proof-file path values are retained; the migration does not geocode coordinates or relocate files.
 
 The checkpoint status field is renamed without changing existing values. New checkpoints default to unapproved (`is_valid=False`) until explicitly reviewed. Event and reward point columns remain ordinary integers so the migration does not introduce database constraints that could reject legacy values. Never run this migration against a production or committed database without a verified backup and representative-data test.
+
+
+## Web experience and route status
+
+The Django views now have templates in the app's actual `templates/` directory. The older HTML mockups remain preserved under `static/Derby_Event/templates/html/` as source archive material; they are not the templates rendered by Django. The new shared layout uses Bootstrap 5.3.9 with pinned CDN Subresource Integrity, semantic page landmarks, and responsive navigation.
+
+Login and signup routes now delegate to django-allauth rather than displaying static forms that never submitted. The participant-profile workflow is not yet integrated with account signup, and photo submissions, reward awarding, and the leaderboard remain explicitly inactive. Do not present those features as live until their data and moderation flows are implemented and tested.
+
+The Louisville guide preserves the categories and place ideas from the original static archive. It is a starting point, not a live directory: verify current partner status, hours, access, and links before publishing specific recommendations.
