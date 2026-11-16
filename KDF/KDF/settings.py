@@ -20,12 +20,27 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '#v^uqf7^^k)vpefy@1ny0*s#t4$u&b1h#eipv3ealwo1po-lq^'
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+if not SECRET_KEY:
+    from django.core.exceptions import ImproperlyConfigured
+    raise ImproperlyConfigured("Set DJANGO_SECRET_KEY before starting Gymkhana Stampede.")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+def env_bool(name, default=False):
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in ("1", "true", "yes", "on")
 
-ALLOWED_HOSTS = []
+
+DEBUG = env_bool("DJANGO_DEBUG", False)
+
+ALLOWED_HOSTS = [
+    host.strip() for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if host.strip()
+]
+CSRF_TRUSTED_ORIGINS = [
+    host.strip() for host in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if host.strip()
+]
 
 # Application definition
 
@@ -215,8 +230,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-GEOPOSITION_GOOGLE_MAPS_API_KEY = 'AIzaSyDy7JrdPC4Y1KmLxhWY5AAisbKtdoYJp9Y'
-GOOGLE_API_KEY = 'AIzaSyDy7JrdPC4Y1KmLxhWY5AAisbKtdoYJp9Y'
+# Optional, restricted browser mapping key. Store replacements in the host secret manager.
+GEOPOSITION_GOOGLE_MAPS_API_KEY = os.environ.get("GEOPOSITION_GOOGLE_MAPS_API_KEY", "")
+GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
 
 ACCOUNT_FORMS = {
     'login': 'allauth.account.forms.LoginForm',
@@ -275,3 +291,18 @@ SOCIALACCOUNT_PROVIDERS = {
         ]
     }
 }
+
+# Security defaults: HSTS stays disabled until the production HTTPS setup is verified.
+SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", not DEBUG)
+SESSION_COOKIE_SECURE = env_bool("DJANGO_SESSION_COOKIE_SECURE", not DEBUG)
+CSRF_COOKIE_SECURE = env_bool("DJANGO_CSRF_COOKIE_SECURE", not DEBUG)
+SESSION_COOKIE_HTTPONLY = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = "DENY"
+SECURE_HSTS_SECONDS = int(os.environ.get("DJANGO_HSTS_SECONDS", "0"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("DJANGO_HSTS_INCLUDE_SUBDOMAINS", False)
+SECURE_HSTS_PRELOAD = env_bool("DJANGO_HSTS_PRELOAD", False)
+
+if env_bool("DJANGO_TRUST_PROXY", False):
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
