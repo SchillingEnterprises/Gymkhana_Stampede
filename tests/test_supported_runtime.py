@@ -34,7 +34,7 @@ class SupportedRuntimeTests(unittest.TestCase):
 
     def test_legacy_migration_keeps_coordinate_storage_as_varchar(self):
         migration = (ROOT / "KDF/Derby_Event/migrations/0001_initial.py").read_text(encoding="utf-8")
-        field = (ROOT / "KDF/Derby_Event/migrations/legacy_fields.py").read_text(encoding="utf-8")
+        field = (ROOT / "KDF/Derby_Event/legacy_migration_fields.py").read_text(encoding="utf-8")
         self.assertIn("LegacyGeopositionField(max_length=42)", migration)
         self.assertIn("models.CharField", field)
         self.assertNotIn("import geoposition.fields", migration)
