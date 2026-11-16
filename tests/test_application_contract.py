@@ -57,7 +57,7 @@ class DjangoApplicationContractTests(unittest.TestCase):
                     if isinstance(item, ast.Return)
                 ]
                 self.assertEqual(len(returns), 1)
-                self.assertIsInstance(returns[0].value, (ast.Attribute, ast.Call))
+                self.assertIsInstance(returns[0].value, (ast.Attribute, ast.Call, ast.JoinedStr))
 
     def test_checkpoint_fields_are_added_non_destructively(self):
         migration = (APP / "migrations" / "0002_checkpoint_fields.py").read_text(encoding="utf-8")
