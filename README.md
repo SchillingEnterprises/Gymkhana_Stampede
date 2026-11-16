@@ -26,6 +26,10 @@ The maintenance workflow compiles project Python and runs standard-library secur
 
 Not ready for production until the framework/dependency stack is brought to supported releases, authentication and social-login providers are verified, the App Engine configuration is reconciled with the actual KDF project module, and HTTPS, hosts, database, backups, and API-key controls are tested on the target host.
 
+## Dependency modernization
+
+See [the dependency upgrade review and release gates](docs/dependency-upgrade-review.md) before merging any large package update.
+
 ## Participant and checkpoint data model
 
 The original event profile model is renamed in place to `Participant` by a forward migration, preserving the existing participant table and rows. A nullable one-to-one link to Django's authentication account is added, but existing participants are not automatically turned into login accounts. Legacy coordinate strings and proof-file path values are retained; the migration does not geocode coordinates or relocate files.
