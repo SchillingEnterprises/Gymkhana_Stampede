@@ -1,8 +1,7 @@
+"""Django admin registrations for the event-domain models."""
 from django.contrib import admin
 
-from .models import User, Event, Checkpoint, Reward
+from .models import Checkpoint, Event, Reward, User
 
-admin.site.register(User)
-admin.site.register(Event)
-admin.site.register(Checkpoint)
-admin.site.register(Reward)
+
+admin.site.register((User, Event, Checkpoint, Reward))
