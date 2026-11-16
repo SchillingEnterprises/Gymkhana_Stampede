@@ -1,0 +1,43 @@
+# IDE workspaces and generated metadata
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries/
+.idea/**/shelf/
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+.idea/**/dbnavigator.xml
+.idea/**/httpRequests/
+.idea/**/caches/
+out/
+*.iml
+*.iws
+
+# Python build/runtime output
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage*
+htmlcov/
+build/
+dist/
+*.egg-info/
+.venv/
+venv/
+env/
+ENV/
+
+# Local secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# OS files
+.DS_Store
+Thumbs.db
