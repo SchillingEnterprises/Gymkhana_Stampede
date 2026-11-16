@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Welcome | Gymkhana Stampede{% endblock %}
+{% block content %}
+<section class="hero-section">
+    <div class="container py-5 py-lg-6">
+        <div class="row align-items-center min-vh-50">
+            <div class="col-lg-8 col-xl-7">
+                <p class="eyebrow mb-3">Kentucky Derby Festival · Louisville, Kentucky</p>
+                <h1 class="display-3 fw-bold text-white mb-3">Find the stories hiding around the city.</h1>
+                <p class="lead text-white-75 mb-4">Explore Louisville, discover Gallopalooza horses, and follow the trail across the Derby City.</p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a class="btn btn-gold btn-lg" href="{% url 'landing_page' %}">Explore the hunt</a>
+                    <a class="btn btn-outline-light btn-lg" href="{% url 'rules' %}">How to play</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="container py-5">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <article class="feature-card h-100">
+                <span class="feature-number">01</span>
+                <h2 class="h4">Discover</h2>
+                <p class="mb-0">Explore Louisville landmarks and the public art trail across the city.</p>
+            </article>
+        </div>
+        <div class="col-md-4">
+            <article class="feature-card h-100">
+                <span class="feature-number">02</span>
+                <h2 class="h4">Explore responsibly</h2>
+                <p class="mb-0">Visit public locations safely and respect private property and posted guidance.</p>
+            </article>
+        </div>
+        <div class="col-md-4">
+            <article class="feature-card h-100">
+                <span class="feature-number">03</span>
+                <h2 class="h4">Get the local view</h2>
+                <p class="mb-0">Use the Louisville guide to find ideas for your Derby City visit.</p>
+            </article>
+        </div>
+    </div>
+</section>
+{% endblock %}
