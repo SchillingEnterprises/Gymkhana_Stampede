@@ -25,3 +25,9 @@ The maintenance workflow compiles project Python and runs standard-library secur
 ## Production readiness
 
 Not ready for production until the framework/dependency stack is brought to supported releases, authentication and social-login providers are verified, the App Engine configuration is reconciled with the actual KDF project module, and HTTPS, hosts, database, backups, and API-key controls are tested on the target host.
+
+## Participant and checkpoint data model
+
+The original event profile model is renamed in place to `Participant` by a forward migration, preserving the existing participant table and rows. A nullable one-to-one link to Django's authentication account is added, but existing participants are not automatically turned into login accounts. Legacy coordinate strings and proof-file path values are retained; the migration does not geocode coordinates or relocate files.
+
+The checkpoint status field is renamed without changing existing values. New checkpoints default to unapproved (`is_valid=False`) until explicitly reviewed. Event and reward point columns remain ordinary integers so the migration does not introduce database constraints that could reject legacy values. Never run this migration against a production or committed database without a verified backup and representative-data test.
