@@ -1,0 +1,28 @@
+:root {
+    --stampede-navy: #142b3b;
+    --stampede-ink: #182a36;
+    --stampede-cream: #f6f2e9;
+    --stampede-gold: #d7ad55;
+    --stampede-muted: #667681;
+}
+body { background: var(--stampede-cream); color: var(--stampede-ink); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.site-navbar { background: var(--stampede-navy); }
+.btn-gold { background: var(--stampede-gold); border-color: var(--stampede-gold); color: #182a36; font-weight: 700; }
+.btn-gold:hover, .btn-gold:focus { background: #e4c276; border-color: #e4c276; color: #182a36; }
+.hero-section { background: radial-gradient(circle at 82% 28%, rgba(215,173,85,.25), transparent 28%), linear-gradient(125deg, #142b3b, #24495d); }
+.min-vh-50 { min-height: 50vh; }
+.text-white-75 { color: rgba(255,255,255,.78); }
+.eyebrow { color: #9b742d; font-size: .75rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.hero-section .eyebrow { color: #e6c77e; }
+.feature-card, .rule-card, .guide-card, .map-panel, .destination-card { display: block; height: 100%; padding: 1.5rem; border: 1px solid rgba(20,43,59,.12); border-radius: 1rem; background: #fff; color: inherit; box-shadow: 0 .4rem 1.5rem rgba(20,43,59,.05); }
+.feature-number { display: inline-block; margin-bottom: 1rem; color: #a27a32; font-size: .8rem; font-weight: 800; letter-spacing: .12em; }
+.destination-card { text-decoration: none; transition: transform .18s ease, box-shadow .18s ease; }
+.destination-card:hover, .destination-card:focus { color: inherit; transform: translateY(-2px); box-shadow: 0 .7rem 1.8rem rgba(20,43,59,.1); }
+.destination-card .eyebrow { display: block; margin-bottom: .5rem; }
+.destination-card-muted { background: #eef1f2; }
+.map-panel iframe { display: block; border: 0; border-radius: .75rem; }
+.guide-card ul { margin-bottom: 0; padding-left: 1.25rem; }
+.guide-card li + li { margin-top: .4rem; }
+.site-footer { background: var(--stampede-navy); color: #fff; }
+.skip-link:focus { position: fixed; z-index: 2000; top: .5rem; left: .5rem; padding: .75rem 1rem; background: #fff; color: #000; border: 2px solid var(--stampede-navy); border-radius: .5rem; }
+@media (prefers-reduced-motion: reduce) { .destination-card { transition: none; } .destination-card:hover { transform: none; } }
