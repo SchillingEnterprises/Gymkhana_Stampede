@@ -1,4 +1,4 @@
-"""Static contracts for the legacy Django project that do not install old dependencies."""
+"""Static contracts for the legacy Django project without installing its old stack."""
 import ast
 from pathlib import Path
 import unittest
@@ -29,21 +29,22 @@ def assigned_names(node):
 
 
 class DjangoApplicationContractTests(unittest.TestCase):
-    def test_models_match_preserved_profile_schema_and_checkpoint_fields(self):
+    def test_models_express_participant_checkpoint_event_and_reward_domains(self):
         nodes = class_nodes(parse(APP / "models.py"))
-        self.assertTrue({"User", "Checkpoint", "Event", "Reward"}.issubset(nodes))
+        self.assertTrue({"Participant", "Checkpoint", "Event", "Reward"}.issubset(nodes))
+        self.assertNotIn("User", nodes, "Participant profile must not impersonate Django authentication")
         self.assertTrue(
-            {"first_name", "last_name", "email_address", "birthday", "location", "proof"}
-            .issubset(assigned_names(nodes["User"]))
+            {"account", "first_name", "last_name", "email_address", "birthday", "location", "proof"}
+            .issubset(assigned_names(nodes["Participant"]))
         )
         self.assertTrue(
-            {"name", "location", "photograph", "information", "isValid"}
+            {"name", "location", "photograph", "information", "is_valid"}
             .issubset(assigned_names(nodes["Checkpoint"]))
         )
 
-    def test_model_string_representations_return_text(self):
+    def test_domain_models_have_text_string_representations(self):
         nodes = class_nodes(parse(APP / "models.py"))
-        for name in ("User", "Checkpoint", "Event", "Reward"):
+        for name in ("Participant", "Checkpoint", "Event", "Reward"):
             with self.subTest(model=name):
                 methods = {
                     child.name: child
@@ -58,24 +59,43 @@ class DjangoApplicationContractTests(unittest.TestCase):
                 self.assertEqual(len(returns), 1)
                 self.assertIsInstance(returns[0].value, (ast.Attribute, ast.Call))
 
-    def test_checkpoint_schema_extension_has_non_destructive_defaults(self):
+    def test_checkpoint_fields_are_added_non_destructively(self):
         migration = (APP / "migrations" / "0002_checkpoint_fields.py").read_text(encoding="utf-8")
-        self.assertIn('dependencies = [', migration)
         self.assertIn('("Derby_Event", "0001_initial")', migration)
         self.assertIn('name="name"', migration)
         self.assertIn('name="isValid"', migration)
         self.assertIn('default=""', migration)
         self.assertIn('default=False', migration)
 
-    def test_admin_imports_only_models_that_exist(self):
+    def test_participant_migration_renames_the_existing_profile_table(self):
+        migration = (APP / "migrations" / "0003_participant_domain.py").read_text(encoding="utf-8")
+        self.assertIn('("Derby_Event", "0002_checkpoint_fields")', migration)
+        self.assertIn('migrations.RenameModel(', migration)
+        self.assertIn('old_name="User"', migration)
+        self.assertIn('new_name="Participant"', migration)
+        self.assertNotIn("migrations.CreateModel(", migration)
+        self.assertIn('name="account"', migration)
+        self.assertIn("null=True", migration)
+        self.assertIn("OneToOneField", migration)
+
+    def test_participant_migration_preserves_checkpoint_status_and_coordinate_strings(self):
+        migration = (APP / "migrations" / "0003_participant_domain.py").read_text(encoding="utf-8")
+        self.assertIn('old_name="isValid"', migration)
+        self.assertIn('new_name="is_valid"', migration)
+        self.assertIn('field=models.BooleanField(default=False)', migration)
+        self.assertIn('field=models.CharField(blank=True, default="", max_length=42)', migration)
+        self.assertNotIn("PositiveIntegerField", migration)
+
+    def test_admin_registers_the_models_that_exist(self):
         tree = parse(APP / "admin.py")
-        imports = {
+        imported = {
             alias.name
             for node in tree.body if isinstance(node, ast.ImportFrom)
             for alias in node.names
             if node.module == "models"
         }
-        self.assertTrue({"User", "Event", "Checkpoint", "Reward"}.issubset(imports))
+        self.assertTrue({"Participant", "Event", "Checkpoint", "Reward"}.issubset(imported))
+        self.assertNotIn("User", imported)
 
     def test_url_configuration_uses_supported_django_url_imports(self):
         project = (PROJECT / "urls.py").read_text(encoding="utf-8")
