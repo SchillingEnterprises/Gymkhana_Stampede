@@ -19,8 +19,8 @@ def louisville_concierge(request):
 
 
 def register(request):
-    """Use django-allauth's real signup flow instead of a static, non-submitting form."""
-    return redirect("account_signup")
+    """Explain that public signup is paused until safe participant onboarding is ready."""
+    return render(request, "registration_paused.html")
 
 
 def rules(request):

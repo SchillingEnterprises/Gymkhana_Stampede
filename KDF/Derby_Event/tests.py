@@ -22,7 +22,10 @@ class PublicPageTests(TestCase):
         response = self.client.get(reverse("login"))
         self.assertRedirects(response, reverse("account_login"), fetch_redirect_response=False)
 
-    def test_signup_route_delegates_to_allauth_but_public_signup_is_disabled(self):
+    def test_signup_route_explains_registration_is_paused_without_opening_signup(self):
         self.assertFalse(settings.ACCOUNT_SIGNUP_ENABLED)
         response = self.client.get(reverse("register"))
-        self.assertRedirects(response, reverse("account_signup"), fetch_redirect_response=False)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "registration_paused.html")
+        self.assertContains(response, "Registration is temporarily paused")
+        self.assertContains(response, reverse("login"))
