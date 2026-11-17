@@ -10,7 +10,7 @@ TEMPLATES = APP / "templates"
 class GymkhanaTemplateResolutionTests(unittest.TestCase):
     def test_every_rendered_template_exists_in_django_template_directory(self):
         views = (APP / "views.py").read_text(encoding="utf-8")
-        for name in ("index.html", "landing_page.html", "louisville_concierge.html", "rules.html"):
+        for name in ("index.html", "landing_page.html", "louisville_concierge.html", "rules.html", "registration_paused.html"):
             with self.subTest(template=name):
                 self.assertIn(f'"{name}"', views)
                 self.assertTrue((TEMPLATES / name).is_file())
@@ -28,10 +28,13 @@ class GymkhanaTemplateResolutionTests(unittest.TestCase):
             with self.subTest(template=name):
                 self.assertIn('{% extends "base.html" %}', (TEMPLATES / name).read_text(encoding="utf-8"))
 
-    def test_login_and_signup_use_real_allauth_routes_not_static_mock_forms(self):
+    def test_login_uses_allauth_and_disabled_signup_has_a_real_explanation_page(self):
         views = (APP / "views.py").read_text(encoding="utf-8")
         self.assertIn('return redirect("account_login")', views)
-        self.assertIn('return redirect("account_signup")', views)
+        self.assertIn('return render(request, "registration_paused.html")', views)
+        paused = (TEMPLATES / "registration_paused.html").read_text(encoding="utf-8")
+        self.assertIn("Registration is temporarily paused", paused)
+        self.assertIn('{% url \'login\' %}', paused)
 
     def test_unimplemented_participation_features_are_not_advertised_as_live(self):
         rules = (TEMPLATES / "rules.html").read_text(encoding="utf-8")
