@@ -106,5 +106,49 @@ class DjangoApplicationContractTests(unittest.TestCase):
         self.assertNotIn("django.conf.urls import url", app)
 
 
+class RuntimeSecuritySettingsTests(unittest.TestCase):
+    def setUp(self):
+        self.settings = (PROJECT / "settings.py").read_text(encoding="utf-8")
+
+    def test_secret_key_is_required_and_never_has_a_committed_fallback(self):
+        self.assertIn('SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")', self.settings)
+        self.assertIn('if not SECRET_KEY:', self.settings)
+        self.assertIn('raise ImproperlyConfigured("Set DJANGO_SECRET_KEY', self.settings)
+
+    def test_debug_is_off_by_default_and_hosts_are_explicit(self):
+        self.assertIn('DEBUG = env_bool("DJANGO_DEBUG", False)', self.settings)
+        self.assertIn('os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")', self.settings)
+        self.assertNotIn('"*"', self.settings)
+
+    def test_csrf_authentication_and_browser_security_middleware_are_enabled(self):
+        for middleware in (
+            '"django.middleware.csrf.CsrfViewMiddleware"',
+            '"django.contrib.auth.middleware.AuthenticationMiddleware"',
+            '"django.middleware.clickjacking.XFrameOptionsMiddleware"',
+        ):
+            with self.subTest(middleware=middleware):
+                self.assertIn(middleware, self.settings)
+        self.assertIn("SECURE_CONTENT_TYPE_NOSNIFF = True", self.settings)
+        self.assertIn('X_FRAME_OPTIONS = "DENY"', self.settings)
+        self.assertIn('SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"', self.settings)
+
+    def test_production_https_and_session_cookie_defaults_follow_debug_mode(self):
+        self.assertIn('SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", not DEBUG)', self.settings)
+        self.assertIn('SESSION_COOKIE_SECURE = env_bool("DJANGO_SESSION_COOKIE_SECURE", not DEBUG)', self.settings)
+        self.assertIn('CSRF_COOKIE_SECURE = env_bool("DJANGO_CSRF_COOKIE_SECURE", not DEBUG)', self.settings)
+        self.assertIn("SESSION_COOKIE_HTTPONLY = True", self.settings)
+        self.assertIn('SESSION_COOKIE_SAMESITE = "Lax"', self.settings)
+        self.assertIn('CSRF_COOKIE_SAMESITE = "Lax"', self.settings)
+
+    def test_postgresql_requires_environment_credentials_and_sqlite_remains_local_default(self):
+        self.assertIn('DB_ENGINE = os.environ.get("DJANGO_DB_ENGINE", "sqlite")', self.settings)
+        for variable in ("DJANGO_DB_NAME", "DJANGO_DB_USER", "DJANGO_DB_PASSWORD", "DJANGO_DB_HOST"):
+            with self.subTest(variable=variable):
+                self.assertIn('"'+variable+'"', self.settings)
+        self.assertIn("if missing_db_values:", self.settings)
+        self.assertIn('raise ImproperlyConfigured(', self.settings)
+        self.assertIn('elif DB_ENGINE == "sqlite":', self.settings)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
