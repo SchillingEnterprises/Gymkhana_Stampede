@@ -41,3 +41,8 @@ ENV/
 # OS files
 .DS_Store
 Thumbs.db
+
+# IDE-generated project/module metadata
+.idea/**/libraries/
+.idea/**/misc.xml
+.idea/**/modules.xml
