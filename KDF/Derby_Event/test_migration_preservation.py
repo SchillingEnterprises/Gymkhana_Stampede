@@ -87,3 +87,40 @@ class LegacyDataPreservationMigrationTests(TransactionTestCase):
         self.assertEqual(event.point_value, 15)
         self.assertEqual(event.location, "38.241048, -85.804615")
         self.assertEqual(reward.point_total, -5)
+
+    def test_reverse_migration_restores_legacy_user_and_preserves_rows(self):
+        """A rollback rehearsal must restore the legacy table without losing data."""
+        executor = MigrationExecutor(connection)
+        try:
+            executor.migrate(self.migrate_from)
+            legacy_apps = executor.loader.project_state(self.migrate_from).apps
+
+            LegacyUser = legacy_apps.get_model("Derby_Event", "User")
+            LegacyCheckpoint = legacy_apps.get_model("Derby_Event", "Checkpoint")
+            LegacyEvent = legacy_apps.get_model("Derby_Event", "Event")
+            LegacyReward = legacy_apps.get_model("Derby_Event", "Reward")
+
+            user = LegacyUser.objects.get(pk=self.legacy_user.pk)
+            self.assertEqual(user.first_name, "Legacy")
+            self.assertEqual(user.last_name, "Participant")
+            self.assertEqual(user.email_address, "legacy-participant@example.test")
+            self.assertEqual(user.location, "38.2560397, -85.8136963")
+            self.assertEqual(user.proof, "legacy/proof.jpg")
+
+            checkpoint = LegacyCheckpoint.objects.get(pk=self.legacy_checkpoint.pk)
+            self.assertEqual(checkpoint.location, "38.2625516, -85.8199476")
+            self.assertEqual(checkpoint.photograph, "legacy/checkpoint.jpg")
+            self.assertEqual(checkpoint.information, "Original checkpoint notes")
+
+            event = LegacyEvent.objects.get(pk=self.legacy_event.pk)
+            self.assertEqual(event.name, "Original Derby Event")
+            self.assertEqual(event.point_value, 15)
+
+            reward = LegacyReward.objects.get(pk=self.legacy_reward.pk)
+            self.assertEqual(reward.point_total, -5)
+        finally:
+            # Leave the disposable test database at the current schema even if
+            # an assertion fails; tearDown also restores the graph's leaf nodes.
+            executor = MigrationExecutor(connection)
+            executor.migrate(self.migrate_to)
+
