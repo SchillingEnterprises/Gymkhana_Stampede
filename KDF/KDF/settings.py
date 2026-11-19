@@ -10,7 +10,14 @@ def env_bool(name, default=False):
     value = os.environ.get(name)
     if value is None:
         return default
-    return value.strip().lower() in ("1", "true", "yes", "on")
+    normalized = value.strip().lower()
+    if normalized in ("1", "true", "yes", "on"):
+        return True
+    if normalized in ("0", "false", "no", "off"):
+        return False
+    raise ImproperlyConfigured(
+        f"{name} must be an explicit boolean value (true/false, yes/no, on/off, or 1/0)."
+    )
 
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
