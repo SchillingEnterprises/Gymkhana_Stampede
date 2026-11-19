@@ -18,7 +18,9 @@ Local development defaults to SQLite. CI always points at a disposable database.
 
 ## Quality checks
 
-The maintenance workflow compiles project Python and runs standard-library security configuration tests. These are early guardrails, not a substitute for running the full application against a supported dependency set and a disposable copy of representative data.
+The GitHub Actions workflow validates the supported application runtime on Python 3.12. It installs the active requirements, checks dependency consistency with `pip check`, compiles project Python, runs source-level security and architecture tests, runs Django system checks, checks migration consistency, and runs Django's production security checks. It then applies migrations to a disposable SQLite database, runs the event application integration tests, and collects static files.
+
+CI points SQLite at a temporary path through `DJANGO_DATABASE_NAME`; it does not migrate or inspect the tracked database. These checks verify the maintained application and its migration graph, but do not provision or validate a live Cloud SQL instance, Secret Manager, external email delivery, production backups, or a target-host deployment rehearsal. Those remain explicit pre-launch requirements.
 
 ## Production readiness
 
