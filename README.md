@@ -66,3 +66,7 @@ python KDF/manage.py collectstatic --noinput
 The App Engine configuration now uses the actual `KDF.wsgi:application` entry point and Python 3.12. Before deployment, collect static files and configure Cloud SQL, Secret Manager values, allowed hosts, and HTTPS proxy settings. The runtime deliberately fails closed when PostgreSQL is selected but its connection values are missing.
 
 The original `GeopositionField` migration is represented by a migration-local `CharField` compatibility type. It retains the same varchar(42) storage shape, so the old coordinate strings are not parsed, transformed, or discarded. The obsolete geoposition app is no longer required by the live runtime.
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for this repository's security, privacy, and responsible-use guidance.
