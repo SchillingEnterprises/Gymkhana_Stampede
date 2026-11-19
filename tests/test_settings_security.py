@@ -1,5 +1,8 @@
 """Source-level security regression tests for Django settings."""
 from pathlib import Path
+import os
+import subprocess
+import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,6 +30,52 @@ class SettingsSecurityTests(unittest.TestCase):
         for name in ("SECURE_SSL_REDIRECT", "SESSION_COOKIE_SECURE", "CSRF_COOKIE_SECURE", "SECURE_CONTENT_TYPE_NOSNIFF", "X_FRAME_OPTIONS"):
             with self.subTest(name=name):
                 self.assertIn(name, SETTINGS)
+
+    def test_invalid_boolean_security_settings_fail_closed(self):
+        env = os.environ.copy()
+        env.update({
+            "DJANGO_SETTINGS_MODULE": "KDF.settings",
+            "DJANGO_SECRET_KEY": "test-only-settings-key",
+            "DJANGO_DEBUG": "tru",
+            "PYTHONPATH": str(ROOT / "KDF"),
+        })
+        result = subprocess.run(
+            [sys.executable, "-c", "from django.conf import settings; print(settings.DEBUG)"],
+            cwd=ROOT / "KDF",
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("DJANGO_DEBUG must be an explicit boolean value", result.stderr)
+
+    def test_explicit_false_boolean_values_are_supported(self):
+        env = os.environ.copy()
+        env.update({
+            "DJANGO_SETTINGS_MODULE": "KDF.settings",
+            "DJANGO_SECRET_KEY": "test-only-settings-key",
+            "DJANGO_DEBUG": "false",
+            "DJANGO_SECURE_SSL_REDIRECT": "off",
+            "DJANGO_SESSION_COOKIE_SECURE": "0",
+            "DJANGO_CSRF_COOKIE_SECURE": "no",
+            "PYTHONPATH": str(ROOT / "KDF"),
+        })
+        result = subprocess.run(
+            [sys.executable, "-c", (
+                "from django.conf import settings; "
+                "assert settings.DEBUG is False; "
+                "assert settings.SECURE_SSL_REDIRECT is False; "
+                "assert settings.SESSION_COOKIE_SECURE is False; "
+                "assert settings.CSRF_COOKIE_SECURE is False"
+            )],
+            cwd=ROOT / "KDF",
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
 
     def test_env_example_contains_only_secret_placeholders(self):
         example = (ROOT / ".env.example").read_text(encoding="utf-8")
