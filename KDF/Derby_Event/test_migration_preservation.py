@@ -2,7 +2,9 @@
 
 from datetime import date, datetime, timezone
 
+from django.contrib.auth import get_user_model
 from django.db import connection
+from django.db.migrations.exceptions import IrreversibleError
 from django.db.migrations.executor import MigrationExecutor
 from django.test import TransactionTestCase
 
@@ -11,7 +13,7 @@ class LegacyDataPreservationMigrationTests(TransactionTestCase):
     """Prove the profile rename and field conversions retain representative rows."""
 
     migrate_from = [("Derby_Event", "0001_initial")]
-    migrate_to = [("Derby_Event", "0003_participant_domain")]
+    migrate_to = [("Derby_Event", "0004_guard_participant_account_rollback")]
 
     def setUp(self):
         super().setUp()
@@ -124,3 +126,41 @@ class LegacyDataPreservationMigrationTests(TransactionTestCase):
             executor = MigrationExecutor(connection)
             executor.migrate(self.migrate_to)
 
+    def test_reverse_migration_blocks_loss_of_participant_account_links(self):
+        """Require explicit link export/clearing before reversing the new field."""
+        Participant = self.apps.get_model("Derby_Event", "Participant")
+        participant = Participant.objects.get(pk=self.legacy_user.pk)
+        account = get_user_model().objects.create_user(
+            username="synthetic-participant-rollback-link",
+            password="unused-test-password",
+        )
+        participant.account_id = account.pk
+        participant.save(update_fields=("account",))
+
+        try:
+            executor = MigrationExecutor(connection)
+            with self.assertRaisesRegex(IrreversibleError, r"Participant\.account"):
+                executor.migrate(self.migrate_from)
+
+            # The failed rollback must be atomic: the association remains usable.
+            current_executor = MigrationExecutor(connection)
+            current_apps = current_executor.loader.project_state(self.migrate_to).apps
+            CurrentParticipant = current_apps.get_model("Derby_Event", "Participant")
+            linked_participant = CurrentParticipant.objects.get(pk=self.legacy_user.pk)
+            self.assertEqual(linked_participant.account_id, account.pk)
+
+            # Simulate the reviewed export/clear step, then prove rollback succeeds.
+            linked_participant.account = None
+            linked_participant.save(update_fields=("account",))
+            MigrationExecutor(connection).migrate(self.migrate_from)
+
+            legacy_apps = MigrationExecutor(connection).loader.project_state(
+                self.migrate_from
+            ).apps
+            LegacyUser = legacy_apps.get_model("Derby_Event", "User")
+            restored_user = LegacyUser.objects.get(pk=self.legacy_user.pk)
+            self.assertEqual(restored_user.first_name, "Legacy")
+            self.assertEqual(restored_user.email_address, "legacy-participant@example.test")
+        finally:
+            # The next test always receives the latest migration state.
+            MigrationExecutor(connection).migrate(self.migrate_to)
