@@ -34,8 +34,9 @@ See [the dependency upgrade review and release gates](docs/dependency-upgrade-re
 
 The original event profile model is renamed in place to `Participant` by a forward migration, preserving the existing participant table and rows. A nullable one-to-one link to Django's authentication account is added, but existing participants are not automatically turned into login accounts. Legacy coordinate strings and proof-file path values are retained; the migration does not geocode coordinates or relocate files.
 
-The checkpoint status field is renamed without changing existing values. New checkpoints default to unapproved (`is_valid=False`) until explicitly reviewed. Event and reward point columns remain ordinary integers so the migration does not introduce database constraints that could reject legacy values. Never run this migration against a production or committed database without a verified backup and representative-data test.
+The rollback guard in `0004_guard_participant_account_rollback` prevents reversing the participant-domain migration while any `Participant.account` associations remain. This avoids silently deleting links added after the forward migration. Before a rollback, export the associations under an approved data-handling plan and explicitly clear them; the guard then allows the schema rollback. CI tests both the blocked rollback and the safe rollback after unlinking, using synthetic data only.
 
+The checkpoint status field is renamed without changing existing values. New checkpoints default to unapproved (`is_valid=False`) until explicitly reviewed. Event and reward point columns remain ordinary integers so the migration does not introduce database constraints that could reject legacy values. Never run this migration against a production or committed database without a verified backup and representative-data test.
 
 ## Web experience and route status
 
@@ -44,7 +45,6 @@ The Django views now have templates in the app's actual `templates/` directory. 
 Login and signup routes now delegate to django-allauth rather than displaying static forms that never submitted. The participant-profile workflow is not yet integrated with account signup, and photo submissions, reward awarding, and the leaderboard remain explicitly inactive. Do not present those features as live until their data and moderation flows are implemented and tested.
 
 The Louisville guide preserves the categories and place ideas from the original static archive. It is a starting point, not a live directory: verify current partner status, hours, access, and links before publishing specific recommendations.
-
 
 ## Supported runtime checks
 
