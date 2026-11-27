@@ -1,6 +1,6 @@
 # Supported Django web runtime (Python 3.12).
 Django==6.1.3
-django-allauth==65.22.1
+django-allauth==65.23.0
 Pillow==13.0.0
 gunicorn==23.0.0
 psycopg[binary]==3.3.9
