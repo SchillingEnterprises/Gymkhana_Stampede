@@ -140,14 +140,20 @@ elif DB_ENGINE in {"postgres", "postgresql"}:
             "DJANGO_DB_PORT must be an integer between 1 and 65535."
         )
 
+    db_host = os.environ["DJANGO_DB_HOST"].strip()
+    uses_cloud_sql_proxy_socket = db_host.startswith("/cloudsql/")
+    default_sslmode = "disable" if uses_cloud_sql_proxy_socket else "verify-full"
     db_sslmode = (
-        os.environ.get("DJANGO_DB_SSLMODE", "verify-full").strip().lower()
-        or "verify-full"
+        os.environ.get("DJANGO_DB_SSLMODE", default_sslmode).strip().lower()
+        or default_sslmode
     )
-    if db_sslmode not in {"verify-ca", "verify-full"}:
+    if db_sslmode not in {"verify-ca", "verify-full"} and not (
+        db_sslmode == "disable" and uses_cloud_sql_proxy_socket
+    ):
         raise ImproperlyConfigured(
-            "DJANGO_DB_SSLMODE must verify the server certificate "
-            "(verify-ca or verify-full)."
+            "DJANGO_DB_SSLMODE must verify the PostgreSQL server certificate "
+            "(verify-ca or verify-full). The disable mode is allowed only when "
+            "DJANGO_DB_HOST uses the /cloudsql/ Cloud SQL Auth Proxy Unix socket."
         )
 
     raw_conn_max_age = (
@@ -175,7 +181,7 @@ elif DB_ENGINE in {"postgres", "postgresql"}:
             "NAME": os.environ["DJANGO_DB_NAME"].strip(),
             "USER": os.environ["DJANGO_DB_USER"].strip(),
             "PASSWORD": os.environ["DJANGO_DB_PASSWORD"],
-            "HOST": os.environ["DJANGO_DB_HOST"].strip(),
+            "HOST": db_host,
             "PORT": str(db_port),
             "CONN_MAX_AGE": conn_max_age,
             "CONN_HEALTH_CHECKS": True,
