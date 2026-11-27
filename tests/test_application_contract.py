@@ -112,7 +112,9 @@ class RuntimeSecuritySettingsTests(unittest.TestCase):
 
     def test_secret_key_is_required_and_never_has_a_committed_fallback(self):
         self.assertIn('SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")', self.settings)
-        self.assertIn('if not SECRET_KEY:', self.settings)
+        self.assertIn('if not SECRET_KEY or not SECRET_KEY.strip():', self.settings)
+        self.assertIn('len(SECRET_KEY) < 50', self.settings)
+        self.assertIn('len(set(SECRET_KEY)) < 5', self.settings)
         self.assertIn('raise ImproperlyConfigured("Set DJANGO_SECRET_KEY', self.settings)
 
     def test_debug_is_off_by_default_and_hosts_are_explicit(self):

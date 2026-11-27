@@ -4,7 +4,7 @@
 
 The historical Django settings file included a Google Maps API key and a Django signing key. The current configuration no longer embeds either value. Because the repository is public, assume historical values in Git history are exposed.
 
-**Required owner action:** revoke/rotate the previously exposed Google API key in Google Cloud Console and restrict any replacement to the exact APIs and HTTP referrers or IP addresses required. Generate a new `DJANGO_SECRET_KEY` and store it only in the hosting provider's secret manager. Replacing the Django signing key invalidates sessions and signed reset links.
+**Required owner action:** revoke/rotate the previously exposed Google API key in Google Cloud Console and restrict any replacement to the exact APIs and HTTP referrers or IP addresses required. Generate a new `DJANGO_SECRET_KEY` with `python -c 'import secrets; print(secrets.token_urlsafe(64))'` and store it only in the hosting provider's secret manager. Replacing the Django signing key invalidates sessions and signed reset links.
 
 ## Current runtime and controls
 
@@ -13,7 +13,7 @@ The active application runtime has been migrated from the legacy Django 2.2-era 
 Current security controls include:
 
 - `DEBUG` is disabled by default.
-- `DJANGO_SECRET_KEY` is required and must be supplied by the deployment environment.
+- `DJANGO_SECRET_KEY` is required, must be at least 50 characters with at least 5 distinct characters, and must be generated uniquely for each environment.
 - `ALLOWED_HOSTS` and CSRF trusted origins are environment-controlled.
 - HTTPS redirects and secure session/CSRF cookies default on when `DEBUG` is false.
 - HSTS remains configurable but disabled by default until the production HTTPS setup is confirmed.
