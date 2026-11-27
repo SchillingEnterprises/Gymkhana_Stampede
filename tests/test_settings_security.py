@@ -104,6 +104,12 @@ class SettingsSecurityTests(unittest.TestCase):
             "DJANGO_SECURE_SSL_REDIRECT": "off",
             "DJANGO_SESSION_COOKIE_SECURE": "0",
             "DJANGO_CSRF_COOKIE_SECURE": "no",
+            "DJANGO_DB_ENGINE": "postgresql",
+            "DJANGO_DB_NAME": "gymkhana-ci",
+            "DJANGO_DB_USER": "gymkhana-ci",
+            "DJANGO_DB_PASSWORD": "ci-only-not-a-real-password",
+            "DJANGO_DB_HOST": "db.example.test",
+            "DJANGO_DB_SSLMODE": "verify-full",
             "PYTHONPATH": str(ROOT / "KDF"),
         })
         result = subprocess.run(
@@ -121,6 +127,145 @@ class SettingsSecurityTests(unittest.TestCase):
             check=False,
         )
         self.assertEqual(result.returncode, 0, msg=result.stderr)
+
+    def test_sqlite_is_restricted_to_debug_development(self):
+        env = os.environ.copy()
+        env.update({
+            "DJANGO_SETTINGS_MODULE": "KDF.settings",
+            "DJANGO_SECRET_KEY": "test-only-settings-key-with-at-least-fifty-characters-and-varied-alphabet",
+            "DJANGO_DEBUG": "false",
+            "DJANGO_DB_ENGINE": "sqlite",
+            "PYTHONPATH": str(ROOT / "KDF"),
+        })
+        result = subprocess.run(
+            [sys.executable, "-c", "from django.conf import settings; print(settings.DATABASES)"],
+            cwd=ROOT / "KDF",
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(
+            "DJANGO_DB_ENGINE=postgresql (or postgres) is required",
+            result.stderr,
+        )
+
+        env["DJANGO_DEBUG"] = "true"
+        result = subprocess.run(
+            [sys.executable, "-c", (
+                "from django.conf import settings; "
+                "assert settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3'"
+            )],
+            cwd=ROOT / "KDF",
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
+    def test_postgresql_requires_certificate_verification_and_valid_bounds(self):
+        base = {
+            "DJANGO_SETTINGS_MODULE": "KDF.settings",
+            "DJANGO_SECRET_KEY": "test-only-settings-key-with-at-least-fifty-characters-and-varied-alphabet",
+            "DJANGO_DEBUG": "false",
+            "DJANGO_ALLOWED_HOSTS": "app.example.test",
+            "DJANGO_DB_ENGINE": "postgresql",
+            "DJANGO_DB_NAME": "gymkhana",
+            "DJANGO_DB_USER": "gymkhana_app",
+            "DJANGO_DB_PASSWORD": "ci-only-not-a-real-password",
+            "DJANGO_DB_HOST": "db.example.test",
+            "PYTHONPATH": str(ROOT / "KDF"),
+        }
+        valid = os.environ.copy()
+        valid.update({
+            **base,
+            "DJANGO_DB_SSLMODE": "verify-full",
+            "DJANGO_DB_SSLROOTCERT": "/etc/ssl/certs/provider-ca.pem",
+            "DJANGO_DB_PORT": "6432",
+        })
+        result = subprocess.run(
+            [sys.executable, "-c", (
+                "from django.conf import settings; "
+                "db=settings.DATABASES['default']; "
+                "assert db['ENGINE'] == 'django.db.backends.postgresql'; "
+                "assert db['OPTIONS'] == {'sslmode': 'verify-full', "
+                "'sslrootcert': '/etc/ssl/certs/provider-ca.pem'}; "
+                "assert db['PORT'] == '6432'; "
+                "assert db['CONN_HEALTH_CHECKS'] is True"
+            )],
+            cwd=ROOT / "KDF",
+            env=valid,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
+        # Direct TCP/PostgreSQL connections must default to full certificate
+        # and hostname verification when no SSL mode is explicitly supplied.
+        default_tls = os.environ.copy()
+        default_tls.update(base)
+        result = subprocess.run(
+            [sys.executable, "-c", (
+                "from django.conf import settings; "
+                "assert settings.DATABASES['default']['OPTIONS']['sslmode'] == 'verify-full'"
+            )],
+            cwd=ROOT / "KDF",
+            env=default_tls,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
+        # Google Cloud SQL Auth Proxy owns the TLS tunnel for its local Unix
+        # socket, so the client-side socket must use sslmode=disable.
+        proxy_env = os.environ.copy()
+        proxy_env.update({
+            **base,
+            "DJANGO_DB_HOST": "/cloudsql/project:region:instance",
+        })
+        result = subprocess.run(
+            [sys.executable, "-c", (
+                "from django.conf import settings; db=settings.DATABASES['default']; "
+                "assert db['HOST'] == '/cloudsql/project:region:instance'; "
+                "assert db['OPTIONS']['sslmode'] == 'disable'"
+            )],
+            cwd=ROOT / "KDF",
+            env=proxy_env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
+        invalid_overrides = (
+            {"DJANGO_DB_SSLMODE": "disable"},
+            {"DJANGO_DB_SSLMODE": "prefer"},
+            {"DJANGO_DB_SSLMODE": "require"},
+            {"DJANGO_DB_PORT": "not-a-port"},
+            {"DJANGO_DB_PORT": "70000"},
+            {"DJANGO_DB_CONN_MAX_AGE": "not-an-integer"},
+            {"DJANGO_DB_CONN_MAX_AGE": "-1"},
+            {"DJANGO_DB_CONN_MAX_AGE": "3601"},
+        )
+        for overrides in invalid_overrides:
+            with self.subTest(overrides=overrides):
+                env = os.environ.copy()
+                env.update({**base, **overrides})
+                result = subprocess.run(
+                    [sys.executable, "-c", "from django.conf import settings; print(settings.DATABASES)"],
+                    cwd=ROOT / "KDF",
+                    env=env,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.assertNotEqual(result.returncode, 0)
+                if "DJANGO_DB_SSLMODE" in overrides:
+                    self.assertIn("must verify the PostgreSQL server certificate", result.stderr)
 
     def test_env_example_contains_only_secret_placeholders(self):
         example = (ROOT / ".env.example").read_text(encoding="utf-8")
