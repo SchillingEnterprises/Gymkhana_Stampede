@@ -21,8 +21,12 @@ def env_bool(name, default=False):
 
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
-if not SECRET_KEY:
+if not SECRET_KEY or not SECRET_KEY.strip():
     raise ImproperlyConfigured("Set DJANGO_SECRET_KEY before starting Gymkhana Stampede.")
+if len(SECRET_KEY) < 50 or len(set(SECRET_KEY)) < 5:
+    raise ImproperlyConfigured(
+        "DJANGO_SECRET_KEY must be at least 50 characters and contain at least 5 distinct characters."
+    )
 
 DEBUG = env_bool("DJANGO_DEBUG", False)
 ALLOWED_HOSTS = [
