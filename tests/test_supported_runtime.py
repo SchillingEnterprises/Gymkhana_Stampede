@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class SupportedRuntimeTests(unittest.TestCase):
     def test_active_requirements_are_small_and_supported(self):
         requirements = (ROOT / "requirements.txt").read_text(encoding="utf-8")
-        for dependency in ("Django==6.1.3", "django-allauth==65.22.1", "Pillow==13.0.0",
+        for dependency in ("Django==6.1.3", "django-allauth==65.23.0", "Pillow==13.0.0",
                            "gunicorn==23.0.0", "psycopg[binary]==3.3.9"):
             with self.subTest(dependency=dependency):
                 self.assertIn(dependency, requirements)
