@@ -12,7 +12,7 @@ This repository began as a Django 2.2-era prototype. The active web runtime is n
 
 ## Environment
 
-Copy `.env.example` as a reference and export its values. The application does not automatically read .env files. `DJANGO_SECRET_KEY` is mandatory. `DJANGO_DEBUG` and `DJANGO_ALLOWED_HOSTS` must be set for the target environment.
+Copy `.env.example` as a reference and export its values. The application does not automatically read .env files. `DJANGO_SECRET_KEY` is mandatory, must be at least 50 characters with at least 5 distinct characters, and should be generated afresh for each environment. Create one with `python -c 'import secrets; print(secrets.token_urlsafe(64))'`. `DJANGO_DEBUG` and `DJANGO_ALLOWED_HOSTS` must be set for the target environment.
 
 Local development defaults to SQLite. CI always points at a disposable database. Production must set `DJANGO_DB_ENGINE=postgresql` and configure `DJANGO_DB_NAME`, `DJANGO_DB_USER`, `DJANGO_DB_PASSWORD`, and `DJANGO_DB_HOST` for a persistent PostgreSQL/Cloud SQL instance. Do not deploy the tracked SQLite database as production storage. Browser mapping keys are optional environment variables; restrict replacements to required APIs and known domains. A key previously committed to public history must be rotated, not merely removed from current files.
 
@@ -51,7 +51,7 @@ The Louisville guide preserves the categories and place ideas from the original 
 Install the active web dependencies with `python -m pip install -r requirements.txt`. Run the app checks from the repository root:
 
 ```bash
-export DJANGO_SECRET_KEY="a-long-random-local-secret"
+export DJANGO_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(64))')"
 export DJANGO_DEBUG=true
 export DJANGO_ALLOWED_HOSTS="localhost,127.0.0.1,testserver"
 export DJANGO_DB_ENGINE=sqlite
