@@ -17,7 +17,11 @@ class SettingsSecurityTests(unittest.TestCase):
         self.assertIn("len(set(SECRET_KEY)) < 5", SETTINGS)
 
     def test_short_and_low_diversity_secret_keys_fail_closed(self):
-        for weak_key in ("short-secret", ("A" * 59) + "b"):
+        weak_keys = (
+            ("short-secret", "at least 50 characters"),
+            (("A" * 59) + "b", "5 distinct characters"),
+        )
+        for weak_key, expected_message in weak_keys:
             with self.subTest(weak_key=weak_key[:8]):
                 env = os.environ.copy()
                 env.update({
@@ -35,7 +39,7 @@ class SettingsSecurityTests(unittest.TestCase):
                     check=False,
                 )
                 self.assertNotEqual(result.returncode, 0)
-                self.assertIn("DJANGO_SECRET_KEY must be at least 50 characters", result.stderr)
+                self.assertIn(expected_message, result.stderr)
 
     def test_valid_high_diversity_secret_key_is_accepted(self):
         env = os.environ.copy()
@@ -120,7 +124,7 @@ class SettingsSecurityTests(unittest.TestCase):
 
     def test_env_example_contains_only_secret_placeholders(self):
         example = (ROOT / ".env.example").read_text(encoding="utf-8")
-        self.assertIn("DJANGO_SECRET_KEY=\\n", example)
+        self.assertIn("DJANGO_SECRET_KEY=\n", example)
         self.assertNotIn("AIza", example)
 
 
