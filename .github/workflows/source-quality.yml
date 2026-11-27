@@ -55,6 +55,13 @@ jobs:
           DJANGO_SESSION_COOKIE_SECURE: "true"
           DJANGO_CSRF_COOKIE_SECURE: "true"
           DJANGO_HSTS_SECONDS: "0"
+          DJANGO_DB_ENGINE: postgresql
+          DJANGO_DB_NAME: gymkhana-ci-check
+          DJANGO_DB_USER: gymkhana-ci-check
+          DJANGO_DB_PASSWORD: ci-only-not-a-real-password
+          DJANGO_DB_HOST: db.example.test
+          DJANGO_DB_PORT: "5432"
+          DJANGO_DB_SSLMODE: verify-full
         run: python KDF/manage.py check --deploy --fail-level ERROR
       - name: Migrate a disposable SQLite database
         run: python KDF/manage.py migrate --noinput
