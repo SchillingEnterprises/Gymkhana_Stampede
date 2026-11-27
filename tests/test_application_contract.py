@@ -149,7 +149,11 @@ class RuntimeSecuritySettingsTests(unittest.TestCase):
                 self.assertIn('"'+variable+'"', self.settings)
         self.assertIn("if missing_db_values:", self.settings)
         self.assertIn('raise ImproperlyConfigured(', self.settings)
-        self.assertIn('elif DB_ENGINE == "sqlite":', self.settings)
+        self.assertIn('if DB_ENGINE == "sqlite":', self.settings)
+        self.assertIn("if not DEBUG:", self.settings)
+        self.assertIn("DJANGO_DB_ENGINE=postgresql (or postgres) is required", self.settings)
+        self.assertIn('db_host.startswith("/cloudsql/")', self.settings)
+        self.assertIn('if db_sslmode not in {"verify-ca", "verify-full"}', self.settings)
 
 
 if __name__ == "__main__":
