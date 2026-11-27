@@ -13,6 +13,9 @@ The active application runtime has been migrated from the legacy Django 2.2-era 
 Current security controls include:
 
 - `DEBUG` is disabled by default.
+- SQLite is allowed only with `DJANGO_DEBUG=true`. A non-debug process must use PostgreSQL and provide database name, user, password, and host.
+- Direct PostgreSQL connections require certificate verification: `DJANGO_DB_SSLMODE` defaults to `verify-full` and accepts `verify-ca` for private CA deployments.
+- Client-side `sslmode=disable` is allowed only when `DJANGO_DB_HOST` points to a `/cloudsql/...` Unix socket managed by the Cloud SQL Auth Proxy; Google documents that the proxy itself establishes the authenticated encrypted connection. It is rejected for ordinary database hosts.
 - SQLite is allowed only when `DJANGO_DEBUG=true`; a non-debug process must select PostgreSQL and provide database name, user, password, and host.
 - PostgreSQL TLS must verify the server certificate: `DJANGO_DB_SSLMODE` defaults to `verify-full` and accepts only `verify-ca` or `verify-full`. Use `DJANGO_DB_SSLROOTCERT` for a private provider CA bundle when required.
 - `DJANGO_SECRET_KEY` is required, must be at least 50 characters with at least 5 distinct characters, and must be generated uniquely for each environment.
@@ -25,7 +28,7 @@ Current security controls include:
 
 ## Production and deployment boundary
 
-The supported framework baseline does not mean the application is production-ready. Before launch, provision persistent PostgreSQL/Cloud SQL, configure secrets and allowed hosts through a secret manager, configure real email delivery and account verification, validate backups and restore, rehearse migrations against a protected representative-data copy, and test deployment on the target host. The application now rejects SQLite whenever `DJANGO_DEBUG=false`; PostgreSQL must be configured with certificate-verifying TLS. Store database credentials and any provider CA path in the deployment environment or secret manager, not in this repository.
+The supported framework baseline does not mean the application is production-ready. Before launch, provision persistent PostgreSQL/Cloud SQL, configure secrets and allowed hosts through a secret manager, configure real email delivery and account verification, validate backups and restore, rehearse migrations against a protected representative-data copy, and test deployment on the target host. SQLite is rejected whenever `DJANGO_DEBUG=false`. Configure a verified direct PostgreSQL connection or use the documented Cloud SQL Auth Proxy Unix socket mode; do not set `sslmode=disable` for a direct network connection. Store DB credentials and CA paths in the hosting secret manager. The application now rejects SQLite whenever `DJANGO_DEBUG=false`; PostgreSQL must be configured with certificate-verifying TLS. Store database credentials and any provider CA path in the deployment environment or secret manager, not in this repository.
 
 Never run migrations against the tracked SQLite database or production records without a verified backup and reviewed migration plan. Signup, photo submissions, reward awarding, and leaderboard features remain inactive until their account, data, and moderation flows are implemented and tested.
 
