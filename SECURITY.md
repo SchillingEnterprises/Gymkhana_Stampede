@@ -13,6 +13,8 @@ The active application runtime has been migrated from the legacy Django 2.2-era 
 Current security controls include:
 
 - `DEBUG` is disabled by default.
+- SQLite is allowed only when `DJANGO_DEBUG=true`; a non-debug process must select PostgreSQL and provide database name, user, password, and host.
+- PostgreSQL TLS must verify the server certificate: `DJANGO_DB_SSLMODE` defaults to `verify-full` and accepts only `verify-ca` or `verify-full`. Use `DJANGO_DB_SSLROOTCERT` for a private provider CA bundle when required.
 - `DJANGO_SECRET_KEY` is required, must be at least 50 characters with at least 5 distinct characters, and must be generated uniquely for each environment.
 - `ALLOWED_HOSTS` and CSRF trusted origins are environment-controlled.
 - HTTPS redirects and secure session/CSRF cookies default on when `DEBUG` is false.
@@ -23,7 +25,7 @@ Current security controls include:
 
 ## Production and deployment boundary
 
-The supported framework baseline does not mean the application is production-ready. Before launch, provision persistent PostgreSQL/Cloud SQL, configure secrets and allowed hosts through a secret manager, configure real email delivery and account verification, validate backups and restore, rehearse migrations against a protected representative-data copy, and test deployment on the target host.
+The supported framework baseline does not mean the application is production-ready. Before launch, provision persistent PostgreSQL/Cloud SQL, configure secrets and allowed hosts through a secret manager, configure real email delivery and account verification, validate backups and restore, rehearse migrations against a protected representative-data copy, and test deployment on the target host. The application now rejects SQLite whenever `DJANGO_DEBUG=false`; PostgreSQL must be configured with certificate-verifying TLS. Store database credentials and any provider CA path in the deployment environment or secret manager, not in this repository.
 
 Never run migrations against the tracked SQLite database or production records without a verified backup and reviewed migration plan. Signup, photo submissions, reward awarding, and leaderboard features remain inactive until their account, data, and moderation flows are implemented and tested.
 
