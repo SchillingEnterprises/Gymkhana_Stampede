@@ -203,6 +203,44 @@ class SettingsSecurityTests(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, msg=result.stderr)
 
+        # Direct TCP/PostgreSQL connections must default to full certificate
+        # and hostname verification when no SSL mode is explicitly supplied.
+        default_tls = os.environ.copy()
+        default_tls.update(base)
+        result = subprocess.run(
+            [sys.executable, "-c", (
+                "from django.conf import settings; "
+                "assert settings.DATABASES['default']['OPTIONS']['sslmode'] == 'verify-full'"
+            )],
+            cwd=ROOT / "KDF",
+            env=default_tls,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
+        # Google Cloud SQL Auth Proxy owns the TLS tunnel for its local Unix
+        # socket, so the client-side socket must use sslmode=disable.
+        proxy_env = os.environ.copy()
+        proxy_env.update({
+            **base,
+            "DJANGO_DB_HOST": "/cloudsql/project:region:instance",
+        })
+        result = subprocess.run(
+            [sys.executable, "-c", (
+                "from django.conf import settings; db=settings.DATABASES['default']; "
+                "assert db['HOST'] == '/cloudsql/project:region:instance'; "
+                "assert db['OPTIONS']['sslmode'] == 'disable'"
+            )],
+            cwd=ROOT / "KDF",
+            env=proxy_env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
         invalid_overrides = (
             {"DJANGO_DB_SSLMODE": "disable"},
             {"DJANGO_DB_SSLMODE": "prefer"},
