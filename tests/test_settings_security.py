@@ -265,7 +265,7 @@ class SettingsSecurityTests(unittest.TestCase):
                 )
                 self.assertNotEqual(result.returncode, 0)
                 if "DJANGO_DB_SSLMODE" in overrides:
-                    self.assertIn("must verify the server certificate", result.stderr)
+                    self.assertIn("must verify the PostgreSQL server certificate", result.stderr)
 
     def test_env_example_contains_only_secret_placeholders(self):
         example = (ROOT / ".env.example").read_text(encoding="utf-8")
