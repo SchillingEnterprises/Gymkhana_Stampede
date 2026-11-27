@@ -12,7 +12,48 @@ SETTINGS = (ROOT / "KDF" / "KDF" / "settings.py").read_text(encoding="utf-8")
 class SettingsSecurityTests(unittest.TestCase):
     def test_secret_key_is_environment_driven(self):
         self.assertIn('SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")', SETTINGS)
-        self.assertIn("if not SECRET_KEY:", SETTINGS)
+        self.assertIn("if not SECRET_KEY", SETTINGS)
+        self.assertIn("len(SECRET_KEY) < 50", SETTINGS)
+        self.assertIn("len(set(SECRET_KEY)) < 5", SETTINGS)
+
+    def test_short_and_low_diversity_secret_keys_fail_closed(self):
+        for weak_key in ("short-secret", ("A" * 59) + "b"):
+            with self.subTest(weak_key=weak_key[:8]):
+                env = os.environ.copy()
+                env.update({
+                    "DJANGO_SETTINGS_MODULE": "KDF.settings",
+                    "DJANGO_SECRET_KEY": weak_key,
+                    "DJANGO_DEBUG": "true",
+                    "PYTHONPATH": str(ROOT / "KDF"),
+                })
+                result = subprocess.run(
+                    [sys.executable, "-c", "from django.conf import settings; print(settings.SECRET_KEY)"],
+                    cwd=ROOT / "KDF",
+                    env=env,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("DJANGO_SECRET_KEY must be at least 50 characters", result.stderr)
+
+    def test_valid_high_diversity_secret_key_is_accepted(self):
+        env = os.environ.copy()
+        env.update({
+            "DJANGO_SETTINGS_MODULE": "KDF.settings",
+            "DJANGO_SECRET_KEY": "test-only-settings-key-with-at-least-fifty-characters-and-varied-alphabet",
+            "DJANGO_DEBUG": "true",
+            "PYTHONPATH": str(ROOT / "KDF"),
+        })
+        result = subprocess.run(
+            [sys.executable, "-c", "from django.conf import settings; assert len(settings.SECRET_KEY) >= 50"],
+            cwd=ROOT / "KDF",
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
 
     def test_debug_is_disabled_by_default(self):
         self.assertIn('DEBUG = env_bool("DJANGO_DEBUG", False)', SETTINGS)
@@ -35,7 +76,7 @@ class SettingsSecurityTests(unittest.TestCase):
         env = os.environ.copy()
         env.update({
             "DJANGO_SETTINGS_MODULE": "KDF.settings",
-            "DJANGO_SECRET_KEY": "test-only-settings-key",
+            "DJANGO_SECRET_KEY": "test-only-settings-key-with-at-least-fifty-characters-and-varied-alphabet",
             "DJANGO_DEBUG": "tru",
             "PYTHONPATH": str(ROOT / "KDF"),
         })
@@ -54,7 +95,7 @@ class SettingsSecurityTests(unittest.TestCase):
         env = os.environ.copy()
         env.update({
             "DJANGO_SETTINGS_MODULE": "KDF.settings",
-            "DJANGO_SECRET_KEY": "test-only-settings-key",
+            "DJANGO_SECRET_KEY": "test-only-settings-key-with-at-least-fifty-characters-and-varied-alphabet",
             "DJANGO_DEBUG": "false",
             "DJANGO_SECURE_SSL_REDIRECT": "off",
             "DJANGO_SESSION_COOKIE_SECURE": "0",
@@ -79,7 +120,7 @@ class SettingsSecurityTests(unittest.TestCase):
 
     def test_env_example_contains_only_secret_placeholders(self):
         example = (ROOT / ".env.example").read_text(encoding="utf-8")
-        self.assertIn("DJANGO_SECRET_KEY=generate-a-long-random-secret", example)
+        self.assertIn("DJANGO_SECRET_KEY=\\n", example)
         self.assertNotIn("AIza", example)
 
 
