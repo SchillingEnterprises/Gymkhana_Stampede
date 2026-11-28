@@ -17,6 +17,7 @@ concurrency:
 jobs:
   source-quality:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       DJANGO_SECRET_KEY: ci-only-test-secret-with-at-least-fifty-characters-and-varied-alphabet
       DJANGO_DEBUG: "true"
